@@ -1,0 +1,28 @@
+CMD: sc query type= service
+
+C++:
+#include <windows.h>
+#include <iostream>
+
+#pragma comment(lib, "advapi32.lib")
+
+int main() {
+    SC_HANDLE hSCM = OpenSCManagerW(NULL, NULL, SC_MANAGER_ENUMERATE_SERVICE);
+    if (!hSCM) return 1;
+
+    DWORD bytesNeeded = 0, servicesReturned = 0, resumeHandle = 0;
+
+    EnumServicesStatusW(hSCM, SERVICE_WIN32, SERVICE_ACTIVE, NULL, 0, &bytesNeeded, &servicesReturned, &resumeHandle);
+
+    ENUM_SERVICE_STATUSW* services = (ENUM_SERVICE_STATUSW*)new BYTE[bytesNeeded];
+
+    if (EnumServicesStatusW(hSCM, SERVICE_WIN32, SERVICE_ACTIVE, services, bytesNeeded, &bytesNeeded, &servicesReturned, &resumeHandle)) {
+        for (DWORD i = 0; i < servicesReturned; ++i) {
+            std::wcout << services[i].lpServiceName << L"\n";
+        }
+    }
+
+    delete[] (BYTE*)services;
+    CloseServiceHandle(hSCM);
+    return 0;
+}
