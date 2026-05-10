@@ -1,0 +1,86 @@
+install .NET SDK Windows
+
+cmd:
+dotnet new web -n TodoApi
+cd TodoApi
+dotnet add package Microsoft.EntityFrameworkCore.InMemory
+
+Program.cs:
+using Microsoft.EntityFrameworkCore;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<TodoDb>(opt => opt.UseInMemoryDatabase("TodoList"));
+
+var app = builder.Build();
+
+var todos = app.MapGroup("/todoitems");
+
+todos.MapGet("/", async (TodoDb db) =>
+    await db.Todos.ToListAsync());
+
+todos.MapGet("/{id}", async (int id, TodoDb db) =>
+    await db.Todos.FindAsync(id)
+        is TodoItem todo
+            ? Results.Ok(todo)
+            : Results.NotFound());
+
+todos.MapPost("/", async (TodoItem todo, TodoDb db) =>
+{
+    if (string.IsNullOrWhiteSpace(todo.Title))
+        return Results.BadRequest("Title is required.");
+
+    db.Todos.Add(todo);
+    await db.SaveChangesAsync();
+
+    return Results.Created($"/todoitems/{todo.Id}", todo);
+});
+
+todos.MapPut("/{id}", async (int id, TodoItem inputTodo, TodoDb db) =>
+{
+    var todo = await db.Todos.FindAsync(id);
+
+    if (todo is null) return Results.NotFound();
+
+    if (string.IsNullOrWhiteSpace(inputTodo.Title))
+        return Results.BadRequest("Title is required.");
+
+    todo.Title = inputTodo.Title;
+    todo.IsComplete = inputTodo.IsComplete;
+
+    await db.SaveChangesAsync();
+
+    return Results.NoContent();
+});
+
+todos.MapDelete("/{id}", async (int id, TodoDb db) =>
+{
+    if (await db.Todos.FindAsync(id) is TodoItem todo)
+    {
+        db.Todos.Remove(todo);
+        await db.SaveChangesAsync();
+        return Results.NoContent();
+    }
+
+    return Results.NotFound();
+});
+
+app.Run();
+
+class TodoItem
+{
+    public int Id { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public bool IsComplete { get; set; }
+}
+
+class TodoDb : DbContext
+{
+    public TodoDb(DbContextOptions<TodoDb> options)
+        : base(options) { }
+
+    public DbSet<TodoItem> Todos => Set<TodoItem>();
+}
+
+cmd:
+dotnet run
