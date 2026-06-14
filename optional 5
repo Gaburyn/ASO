@@ -1,0 +1,21 @@
+1.
+sudo apt install openssh-server -y
+sudo systemctl enable --now ssh
+
+2. 
+ip a         
+ipconfig   
+
+3.
+# From host → VM1
+ssh user@192.168.1.101
+
+# From VM1 → VM2
+ssh user@192.168.1.102
+
+# From VM1 → Host 
+ssh user@192.168.1.100
+
+4.
+sudo apt install telnetd -y     
+telnet 192.168.1.101    
