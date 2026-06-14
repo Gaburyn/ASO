@@ -1,0 +1,9 @@
+Trafic malitios:
+Linie: 䅁䅁䅁䅁䅁䅁䅁䅁䅁䅁䅁䅁䅁䅁䅁䅁 și 塘塘塘塘塘塘塘塘塘塘塘塘塘塘塘塘塘塘塘塘塘塘塘塘塘塘塘塘
+Elemente suspecte: Lungime anormală și caractere repetitive. Depăsire în mod deliberat limitele de memorie alocate, cu scop de prăbușire a aplicației sau de a permite executarea de cod arbitrar.
+Categoria de atac: Buffer Overflow / Fuzzing.
+
+Linie: P体吠⽴牡湳晥爠䡔呐⼱⸱ഊ䡯獴㨠扡湫⹥硡浰汥⹣潭ഊ䍯湴敮琭䱥湧瑨㨠㌰ഊഊ慭潵湴㴵〰♴潟慣捯畮琽ㄲ㌴㔶.
+Detalii decodificate: POST /transfer HTTP/1.1 Host: bank.example.com amount=5000&to_account=123456.
+Elemente suspecte: O cerere POST care modifică starea, direcționată către un endpoint (bank.example.com), ascunsă în traficul web (example.com). Payload-ul inițiază un transfer de valoare mare (amount=5000&to_account=123456), dar nu conține mecanisme de validare obligatorii sau token-uri anti-CSRF.
+Categoria de atac: Cross-Site Request Forgery (CSRF).
